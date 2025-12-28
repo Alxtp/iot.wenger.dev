@@ -16,20 +16,29 @@ export default defineEventHandler(async (event) => {
     const database: Database = client.database(dbName);
     const container: Container = database.container(containerName);
 
+    const query = getQuery(event)
+    const fromDateTime = query.from ? String(query.from) : null
+    const toDateTime = query.to ? String(query.to) : String(new Date().toISOString())
+
     const querySpec: SqlQuerySpec = {
       query: `
-      SELECT TOP 1
+        SELECT ${query.from ? "" : "TOP 1"}
           c.device,
           c.Body.datetime,
           c.Body.humidity,
           c.Body.temperature,
           c._ts
-      FROM c
-      ORDER BY c._ts DESC
-      `
+        FROM c
+        ${query.from ? "WHERE c.Body.datetime BETWEEN @from AND @to" : ""}
+        ORDER BY c._ts DESC
+      `,
+      parameters: query.from ? [
+        { name: "@from", value: fromDateTime },
+        { name: "@to", value: toDateTime }
+      ] : []
     };
 
-    const { resources } = await container.items.query(querySpec).fetchAll();
+    const { resources } = await container.items.query(querySpec).fetchAll()
 
     if (resources.length === 0) {
       return {
@@ -39,17 +48,18 @@ export default defineEventHandler(async (event) => {
       };
     }
 
-    const latestReading = resources[0];
+    const data = resources.map(reading => ({
+      device: reading.device,
+      datetime: reading.datetime,
+      humidity: reading.humidity,
+      temperature: reading.temperature,
+      timestamp: reading._ts
+    }));
 
     return {
       success: true,
-      data: {
-        device: latestReading.device,
-        datetime: latestReading.datetime,
-        humidity: latestReading.humidity,
-        temperature: latestReading.temperature,
-        timestamp: latestReading._ts
-      }
+      query: query,
+      data: data
     };
 
   } catch (error: any){
