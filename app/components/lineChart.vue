@@ -84,7 +84,9 @@ const getScaleWithPadding = (values: number[], paddingPercent: number = 10) => {
   const min = Math.min(...values)
   const max = Math.max(...values)
   const range = max - min
-  const padding = range * (paddingPercent / 100)
+
+  const effectiveRange = range === 0 ? 1 : range
+  const padding = effectiveRange * (paddingPercent / 100)
 
   return {
     min: Math.floor(min - padding),
