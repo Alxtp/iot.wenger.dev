@@ -58,7 +58,6 @@ export default defineEventHandler(async (event) => {
 
     return {
       success: true,
-      query: query,
       data: data
     };
 
