@@ -15,7 +15,7 @@ permissions:
 env:
   AZURE_WEBAPP_NAME: 'app-iot-dev'
   AZURE_WEBAPP_PACKAGE_PATH: '.output'
-  NODE_VERSION: '24.12'
+  NODE_VERSION: '24.11'
 
 jobs:
   build-and-deploy:
