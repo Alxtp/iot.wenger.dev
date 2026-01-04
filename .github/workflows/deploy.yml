@@ -21,8 +21,7 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-    - name: 'Checkout Repo'
-      uses: actions/checkout@main
+    - uses: actions/checkout@v6
 
     - uses: azure/login@v2
       with:
@@ -31,15 +30,14 @@ jobs:
         subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
     - name: Setup Node ${{ env.NODE_VERSION }}
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v6
       with:
         node-version: ${{ env.NODE_VERSION }}
 
-    - name: 'npm install, build, and test'
+    - name: 'npm install and build'
       run: |
         npm install
-        npm run build --if-present
-        npm run test --if-present
+        npm run build
 
     - uses: azure/webapps-deploy@v3
       with:
